@@ -1,3 +1,5 @@
+import { GraphQLError } from "graphql";
+import { error } from "node:console";
 export class ApplicationException extends Error {
     status;
     constructor(message, status, cause) {
@@ -5,6 +7,9 @@ export class ApplicationException extends Error {
         this.status = status;
     }
 }
+export const mapGraphQLError = (error) => {
+    throw new GraphQLError(error.message, { extensions: { statusCode: error.status, errorCause: error.cause || {} } });
+};
 export class BadRequestException extends ApplicationException {
     constructor(message = "Bad Request", cause) {
         super(message, 400, cause);

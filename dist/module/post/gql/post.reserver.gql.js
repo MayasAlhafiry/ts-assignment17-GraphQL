@@ -1,5 +1,6 @@
 import { TokenService } from "../../../common/token.servic.js";
 import { PostService } from "../post.service.js";
+import { BadRequestException, mapGraphQLError, NotFoundException } from "../../../common/error.exceptions.js";
 class PostResolver {
     tokenService;
     postService;
@@ -14,17 +15,19 @@ class PostResolver {
         };
     };
     postListById = async (parents, args, context) => {
-        const tokenHeaders = context.req.headers.authorization;
-        const [bearer, token] = tokenHeaders.split(" ");
-        const decodedToken = this.tokenService.decodeToken(token);
-        const userId = args?.userId || decodedToken.id;
-        console.log("USER ID:", userId);
-        console.log("ARGS:", args);
-        const postData = await this.postService.getPostsByUserId(userId);
-        console.log("POST DATA:", postData);
-        return {
-            message: postData
-        };
+        try {
+            const tokenHeaders = context.req.headers.authorization;
+            const [bearer, token] = tokenHeaders.split(" ");
+            const decodedToken = this.tokenService.decodeToken(token);
+            const userId = args?.userId || decodedToken.id;
+            const postData = await this.postService.getPostsByUserId(userId);
+            return {
+                message: postData
+            };
+        }
+        catch (err) {
+            throw mapGraphQLError(new NotFoundException("somthing went wrong"));
+        }
     };
     createPost = async (parents, args, context) => {
         const post = await this.postService.createPost(args);

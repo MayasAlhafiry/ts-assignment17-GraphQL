@@ -2,10 +2,12 @@ import { Router } from "express";
 import type { Request, Response } from "express";
 import userService from "./user.service.js";
 import { SuccessResponse } from "../../common/success.responce.js";
+import { Validation } from "../../middleware/validation.middleware.js";
+import { signupSchema } from "./user.validation.js";
 
 const router: Router = Router()
 
-router.post('/signup', async (req: Request, res: Response) => {
+router.post('/signup', Validation(signupSchema),async (req: Request, res: Response) => {
     const data = await userService.signup(req.body)
     SuccessResponse({ res, message: "User registered successfully", status: 201, data })
 })

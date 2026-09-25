@@ -1,3 +1,6 @@
+import { GraphQLError } from "graphql"
+import { error } from "node:console"
+
 interface IAppError {
     status: number,
     message: string, 
@@ -9,6 +12,10 @@ export class ApplicationException extends Error implements IAppError{
     constructor(message: string, public status: number, cause?: unknown){
         super(message, {cause})
     }
+}
+
+export const mapGraphQLError = (error: ApplicationException) => {
+    throw new GraphQLError(error.message, {extensions: {statusCode: error.status, errorCause: error.cause || {}}})
 }
 
 
